@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="id" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPredict AI — Analytics Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 45%, #f8fafc 100%);
+            --card-bg: rgba(255, 255, 255, 0.88);
+            --card-border: rgba(255, 255, 255, 0.9);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --sub-bg: #f1f5f9;
+        }
+        [data-bs-theme="dark"] {
+            --bg-gradient: linear-gradient(135deg, #090d16 0%, #111827 50%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.78);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --sub-bg: rgba(15, 23, 42, 0.6);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            color: var(--text-main);
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hero-banner {
+            background: linear-gradient(120deg, #2563eb 0%, #4f46e5 55%, #7c3aed 100%);
+            border-radius: 24px;
+            color: #ffffff;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-banner::after {
+            content: "";
+            position: absolute;
+            top: -40%;
+            right: -10%;
+            width: 320px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(255,255,255,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .score-number {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        [data-bs-theme="dark"] .score-number {
+            background: linear-gradient(135deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub-panel {
+            background: var(--sub-bg);
+            border-radius: 16px;
+        }
+        .preset-pill {
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 6px 14px;
+            transition: all 0.2s;
+        }
+        .preset-pill:hover {
+            transform: translateY(-2px);
+        }
+        .nav-pills .nav-link {
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar -->
+    <nav class="navbar navbar-expand-lg pt-3 pb-2">
+        <div class="container">
+            <a class="navbar-brand fw-extrabold d-flex align-items-center gap-2" href="/">
+                <div class="bg-primary text-white rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                    <i class="bi bi-cpu-fill fs-5"></i>
+                </div>
+                <span class="fw-bold fs-4">EduPredict<span class="text-primary">AI</span></span>
+            </a>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 d-none d-sm-inline-block">
+                    <i class="bi bi-check-circle-fill me-1"></i>Model Terlatih Aktif
+                </span>
+                <button class="btn btn-outline-secondary rounded-circle" id="themeToggle" title="Ganti Tema Gelap/Terang" style="width: 40px; height: 40px;">
+                    <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-3 pb-5">
+        <!-- Hero Banner -->
+        <div class="hero-banner p-4 p-md-5 mb-4 shadow">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-inline-flex align-items-center gap-2 bg-white bg-opacity-15 px-3 py-1 rounded-pill mb-3 small fw-semibold">
+                        <i class="bi bi-mortarboard-fill"></i> Tugas Akhir 2 • Pembelajaran Mesin
+                    </div>
+                    <h1 class="fw-bold display-6 mb-2">Prediksi Skor Ujian Akhir Mahasiswa</h1>
+                    <p class="mb-0 opacity-75">
+                        Eksplorasi hubungan linear antara durasi belajar dan capaian nilai ujian secara <em>real-time</em>.
+                    </p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                    <div class="d-inline-block text-start bg-dark bg-opacity-25 p-3 rounded-4 border border-white border-opacity-25">
+                        <span class="d-block text-uppercase opacity-75" style="font-size: 0.72rem; letter-spacing: 1px;">Fungsi Regresi Linear</span>
+                        <code class="text-white fs-5 fw-bold">ŷ = {{ intercept }} + {{ slope }}x</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="row g-4">
+            <!-- Panel Kiri: Kalkulator Interaktif & Reverse Target -->
+            <div class="col-lg-5">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <ul class="nav nav-pills nav-fill sub-panel p-1 mb-4" id="simTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="predict-tab" data-bs-toggle="pill" data-bs-target="#predict-pane" type="button" role="tab">
+                                    <i class="bi bi-sliders me-1"></i> Prediksi Skor
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="target-tab" data-bs-toggle="pill" data-bs-target="#target-pane" type="button" role="tab">
+                                    <i class="bi bi-bullseye me-1"></i> Target Nilai
+                                </button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content" id="simTabsContent">
+                            <!-- TAB 1: Prediksi Skor dari Jam Belajar -->
+                            <div class="tab-pane fade show active" id="predict-pane" role="tabpanel">
+                                <form method="POST" action="/" id="predictForm">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label for="hoursInput" class="form-label fw-semibold mb-0">Durasi Jam Belajar</label>
+                                        <span class="badge bg-primary fs-6 rounded-pill px-3" id="hoursBadge">
+                                            {{ jam if jam is not none else '5.0' }} Jam
+                                        </span>
+                                    </div>
+
+                                    <input type="range" class="form-range my-2" min="0" max="10" step="0.1" 
+                                           id="hoursRange" value="{{ jam if jam is not none else 5.0 }}">
+
+                                    <div class="input-group input-group-lg mb-3">
+                                        <span class="input-group-text bg-transparent border-end-0 text-primary">
+                                            <i class="bi bi-clock"></i>
+                                        </span>
+                                        <input type="number" step="0.1" min="0" max="24" class="form-control border-start-0 fw-bold" 
+                                               id="hoursInput" name="hours" value="{{ jam if jam is not none else '5.0' }}" required>
+                                        <button type="submit" class="btn btn-primary px-4 fw-semibold">Simpan</button>
+                                    </div>
+
+                                    <!-- Tombol Preset Cepat -->
+                                    <div class="d-flex flex-wrap gap-2 mb-4">
+                                        <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="1.5">1.5j • Santai</button>
+                                        <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="5.0">5.0j • Normal</button>
+                                        <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="7.5">7.5j • Fokus</button>
+                                        <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="9.2">9.2j • Maksimal</button>
+                                    </div>
+                                </form>
+
+                                <!-- Kartu Hasil Live -->
+                                <div class="sub-panel p-4 text-center border">
+                                    <span class="text-uppercase fw-bold small opacity-75">Estimasi Skor Ujian (Live)</span>
+                                    <div class="score-number my-2" id="liveScoreDisplay">
+                                        {{ prediksi if prediksi is not none else '51.23' }}
+                                    </div>
+                                    
+                                    <div class="progress my-3" style="height: 10px; border-radius: 10px;">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" 
+                                             id="scoreProgress" role="progressbar" style="width: 51%;"></div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill px-3 py-2 bg-primary" id="liveGradeBadge">Baik (Grade B)</span>
+                                    </div>
+                                    <p class="small opacity-75 mb-0" id="liveAdviceText">
+                                        Geser slider di atas untuk melihat perubahan prediksi skor secara langsung.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- TAB 2: Reverse Calculator -->
+                            <div class="tab-pane fade" id="target-pane" role="tabpanel">
+                                <p class="small opacity-75 mb-3">
+                                    Ingin mendapatkan skor ujian tertentu? Masukkan target nilai Anda untuk menghitung rekomendasi minimal jam belajar.
+                                </p>
+                                <div class="mb-3">
+                                    <label for="targetScoreInput" class="form-label fw-semibold">Target Skor Ujian (0 - 100)</label>
+                                    <div class="input-group input-group-lg">
+                                        <span class="input-group-text bg-transparent text-success"><i class="bi bi-trophy"></i></span>
+                                        <input type="number" min="10" max="100" step="1" class="form-control fw-bold" id="targetScoreInput" value="85">
+                                        <span class="input-group-text">Poin</span>
+                                    </div>
+                                </div>
+                                <div class="sub-panel p-4 text-center border mt-4">
+                                    <span class="text-uppercase fw-bold small opacity-75">Rekomendasi Durasi Belajar</span>
+                                    <div class="score-number my-2" id="neededHoursDisplay">8.5 Jam</div>
+                                    <p class="small opacity-75 mb-0">
+                                        Dihitung menggunakan invers model: <code>x = (Target - {{ intercept }}) / {{ slope }}</code>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top d-flex align-items-center gap-2 small opacity-75">
+                        <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+                        <span>Setiap tambahan <strong>1 jam</strong> belajar menaikkan estimasi skor sebesar <strong>+{{ slope }} poin</strong>.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel Kanan: Grafik Visualisasi Interaktif -->
+            <div class="col-lg-7">
+                <div class="glass-card p-4 h-100 d-flex flex-column">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0"><i class="bi bi-graph-up text-primary me-2"></i>Grafik Regresi Linear</h5>
+                            <small class="opacity-75">Titik merah bergerak mengikuti input jam belajar Anda</small>
+                        </div>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-2 rounded-pill fw-semibold" id="coordPill">
+                            <i class="bi bi-geo-alt-fill me-1"></i>Koordinat: (5.0 Jam, 51.2)
+                        </span>
+                    </div>
+
+                    <div class="flex-grow-1 position-relative" style="min-height: 340px;">
+                        <canvas id="regressionChart"></canvas>
+                    </div>
+
+                    <!-- Metrik Model -->
+                    <div class="row g-3 mt-3 pt-3 border-top text-center">
+                        <div class="col-4">
+                            <div class="sub-panel p-2">
+                                <small class="opacity-75 d-block" style="font-size: 0.75rem;">Intersep (β₀)</small>
+                                <span class="fw-bold fs-6">{{ intercept }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="sub-panel p-2">
+                                <small class="opacity-75 d-block" style="font-size: 0.75rem;">Koefisien (β₁)</small>
+                                <span class="fw-bold fs-6 text-primary">+{{ slope }}</span>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="sub-panel p-2">
+                                <small class="opacity-75 d-block" style="font-size: 0.75rem;">R-Squared (R²)</small>
+                                <span class="fw-bold fs-6 text-success">0.968 (96.8%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jembatan Data Flask ke JSON (Menghilangkan Error Linter VS Code) -->
+    <script id="flask-data" type="application/json">
+        {
+            "intercept": {{ intercept | tojson }},
+            "slope": {{ slope | tojson }},
+            "scatterData": {{ scatter_data | tojson }},
+            "lineData": {{ line_data | tojson }}
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mengambil data model dari elemen JSON tanpa mencampur sintaks Jinja di JS
+        const flaskData = JSON.parse(document.getElementById('flask-data').textContent);
+        const INTERCEPT = flaskData.intercept;
+        const SLOPE = flaskData.slope;
+        const scatterData = flaskData.scatterData;
+        const lineData = flaskData.lineData;
+
+        // Elemen UI
+        const rangeInput = document.getElementById('hoursRange');
+        const numberInput = document.getElementById('hoursInput');
+        const hoursBadge = document.getElementById('hoursBadge');
+        const liveScoreDisplay = document.getElementById('liveScoreDisplay');
+        const scoreProgress = document.getElementById('scoreProgress');
+        const liveGradeBadge = document.getElementById('liveGradeBadge');
+        const liveAdviceText = document.getElementById('liveAdviceText');
+        const coordPill = document.getElementById('coordPill');
+
+        // Inisialisasi Chart.js
+        const ctx = document.getElementById('regressionChart').getContext('2d');
+        const regressionChart = new Chart(ctx, {
+            data: {
+                datasets: [
+                    {
+                        type: 'scatter',
+                        label: 'Posisi Prediksi Anda',
+                        data: [{ x: 5.0, y: 51.2 }],
+                        backgroundColor: '#ef4444',
+                        borderColor: '#ffffff',
+                        borderWidth: 3,
+                        pointRadius: 11,
+                        pointHoverRadius: 14
+                    },
+                    {
+                        type: 'scatter',
+                        label: 'Dataset Aktual Siswa',
+                        data: scatterData,
+                        backgroundColor: 'rgba(37, 99, 235, 0.75)',
+                        borderColor: '#2563eb',
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    },
+                    {
+                        type: 'line',
+                        label: 'Garis Regresi (Best-Fit)',
+                        data: lineData,
+                        borderColor: '#7c3aed',
+                        borderWidth: 2.5,
+                        borderDash: [6, 4],
+                        fill: false,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 250 },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: (${ctx.parsed.x} Jam, Skor ${ctx.parsed.y})`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: 'Durasi Jam Belajar (Jam)', font: { weight: 'bold' } },
+                        min: 0,
+                        max: 11,
+                        grid: { color: 'rgba(148, 163, 184, 0.15)' }
+                    },
+                    y: {
+                        title: { display: true, text: 'Skor Ujian (0 - 100)', font: { weight: 'bold' } },
+                        min: 0,
+                        max: 105,
+                        grid: { color: 'rgba(148, 163, 184, 0.15)' }
+                    }
+                }
+            }
+        });
+
+        // Fungsi Hitung Prediksi Live
+        function calculateLive(hoursVal) {
+            let h = parseFloat(hoursVal);
+            if (isNaN(h) || h < 0) h = 0;
+            if (h > 24) h = 24;
+
+            let rawScore = INTERCEPT + (SLOPE * h);
+            let finalScore = Math.min(Math.max(rawScore, 0), 100);
+            let roundedScore = finalScore.toFixed(2);
+
+            hoursBadge.textContent = h.toFixed(1) + ' Jam';
+            liveScoreDisplay.textContent = roundedScore;
+            scoreProgress.style.width = finalScore + '%';
+            coordPill.innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i>Koordinat: (${h.toFixed(1)} Jam, ${roundedScore})`;
+
+            scoreProgress.className = 'progress-bar progress-bar-striped progress-bar-animated';
+            if (finalScore >= 85) {
+                liveGradeBadge.className = 'badge rounded-pill px-3 py-2 bg-success';
+                liveGradeBadge.textContent = 'Sangat Baik (Grade A)';
+                liveAdviceText.textContent = 'Pertahankan konsistensi belajar Anda untuk hasil maksimal!';
+                scoreProgress.classList.add('bg-success');
+            } else if (finalScore >= 70) {
+                liveGradeBadge.className = 'badge rounded-pill px-3 py-2 bg-primary';
+                liveGradeBadge.textContent = 'Baik (Grade B)';
+                liveAdviceText.textContent = 'Capaian sudah baik, sedikit tambahan waktu belajar bisa menembus Grade A.';
+                scoreProgress.classList.add('bg-primary');
+            } else if (finalScore >= 55) {
+                liveGradeBadge.className = 'badge rounded-pill px-3 py-2 bg-warning text-dark';
+                liveGradeBadge.textContent = 'Cukup (Grade C)';
+                liveAdviceText.textContent = 'Disarankan menambah durasi belajar dan latihan soal secara rutin.';
+                scoreProgress.classList.add('bg-warning');
+            } else {
+                liveGradeBadge.className = 'badge rounded-pill px-3 py-2 bg-danger';
+                liveGradeBadge.textContent = 'Perlu Ditingkatkan (Grade D)';
+                liveAdviceText.textContent = 'Durasi belajar masih minim. Tingkatkan fokus dan jam belajar harian.';
+                scoreProgress.classList.add('bg-danger');
+            }
+
+            regressionChart.data.datasets[0].data = [{ x: h, y: parseFloat(roundedScore) }];
+            regressionChart.update();
+        }
+
+        // Event Listeners Slider & Input
+        rangeInput.addEventListener('input', function() {
+            numberInput.value = this.value;
+            calculateLive(this.value);
+        });
+
+        numberInput.addEventListener('input', function() {
+            if (this.value <= 10) rangeInput.value = this.value;
+            calculateLive(this.value);
+        });
+
+        // Event Listener Tombol Preset Cepat
+        document.querySelectorAll('.preset-pill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const val = this.getAttribute('data-hours');
+                numberInput.value = val;
+                if (parseFloat(val) <= 10) rangeInput.value = val;
+                calculateLive(val);
+            });
+        });
+
+        // Kalkulator Target Nilai (Tab 2)
+        const targetScoreInput = document.getElementById('targetScoreInput');
+        const neededHoursDisplay = document.getElementById('neededHoursDisplay');
+
+        targetScoreInput.addEventListener('input', function() {
+            let target = parseFloat(this.value);
+            if (isNaN(target)) return;
+            let needed = (target - INTERCEPT) / SLOPE;
+            needed = Math.max(0, needed);
+            neededHoursDisplay.textContent = needed.toFixed(1) + ' Jam';
+        });
+
+        // Dark / Light Mode Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const htmlEl = document.documentElement;
+
+        themeToggle.addEventListener('click', () => {
+            const isDark = htmlEl.getAttribute('data-bs-theme') === 'dark';
+            const nextTheme = isDark ? 'light' : 'dark';
+            htmlEl.setAttribute('data-bs-theme', nextTheme);
+            themeIcon.className = isDark ? 'bi bi-moon-stars-fill' : 'bi bi-sun-fill';
+            
+            const textColor = isDark ? '#334155' : '#e2e8f0';
+            regressionChart.options.plugins.legend.labels.color = textColor;
+            regressionChart.options.scales.x.ticks.color = textColor;
+            regressionChart.options.scales.y.ticks.color = textColor;
+            regressionChart.options.scales.x.title.color = textColor;
+            regressionChart.options.scales.y.title.color = textColor;
+            regressionChart.update();
+        });
+
+        // Jalankan kalkulasi awal saat halaman dimuat
+        calculateLive(numberInput.value);
+    </script>
+</body>
+</html>

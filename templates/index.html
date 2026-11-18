@@ -98,7 +98,6 @@
 </head>
 <body>
 
-    <!-- Top Navbar -->
     <nav class="navbar navbar-expand-lg pt-3 pb-2">
         <div class="container">
             <a class="navbar-brand fw-extrabold d-flex align-items-center gap-2" href="/">
@@ -119,7 +118,6 @@
     </nav>
 
     <div class="container py-3 pb-5">
-        <!-- Hero Banner -->
         <div class="hero-banner p-4 p-md-5 mb-4 shadow">
             <div class="row align-items-center">
                 <div class="col-lg-8">
@@ -140,9 +138,7 @@
             </div>
         </div>
 
-        <!-- Dashboard Grid -->
         <div class="row g-4">
-            <!-- Panel Kiri: Kalkulator Interaktif & Reverse Target -->
             <div class="col-lg-5">
                 <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
                     <div>
@@ -160,7 +156,6 @@
                         </ul>
 
                         <div class="tab-content" id="simTabsContent">
-                            <!-- TAB 1: Prediksi Skor dari Jam Belajar -->
                             <div class="tab-pane fade show active" id="predict-pane" role="tabpanel">
                                 <form method="POST" action="/" id="predictForm">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -182,7 +177,6 @@
                                         <button type="submit" class="btn btn-primary px-4 fw-semibold">Simpan</button>
                                     </div>
 
-                                    <!-- Tombol Preset Cepat -->
                                     <div class="d-flex flex-wrap gap-2 mb-4">
                                         <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="1.5">1.5j • Santai</button>
                                         <button type="button" class="btn btn-outline-secondary preset-pill" data-hours="5.0">5.0j • Normal</button>
@@ -191,7 +185,6 @@
                                     </div>
                                 </form>
 
-                                <!-- Kartu Hasil Live -->
                                 <div class="sub-panel p-4 text-center border">
                                     <span class="text-uppercase fw-bold small opacity-75">Estimasi Skor Ujian (Live)</span>
                                     <div class="score-number my-2" id="liveScoreDisplay">
@@ -212,7 +205,6 @@
                                 </div>
                             </div>
 
-                            <!-- TAB 2: Reverse Calculator -->
                             <div class="tab-pane fade" id="target-pane" role="tabpanel">
                                 <p class="small opacity-75 mb-3">
                                     Ingin mendapatkan skor ujian tertentu? Masukkan target nilai Anda untuk menghitung rekomendasi minimal jam belajar.
@@ -243,7 +235,6 @@
                 </div>
             </div>
 
-            <!-- Panel Kanan: Grafik Visualisasi Interaktif -->
             <div class="col-lg-7">
                 <div class="glass-card p-4 h-100 d-flex flex-column">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
@@ -260,7 +251,6 @@
                         <canvas id="regressionChart"></canvas>
                     </div>
 
-                    <!-- Metrik Model -->
                     <div class="row g-3 mt-3 pt-3 border-top text-center">
                         <div class="col-4">
                             <div class="sub-panel p-2">
@@ -286,7 +276,6 @@
         </div>
     </div>
 
-    <!-- Jembatan Data Flask ke JSON (Menghilangkan Error Linter VS Code) -->
     <script id="flask-data" type="application/json">
         {
             "intercept": {{ intercept | tojson }},
@@ -298,14 +287,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Mengambil data model dari elemen JSON tanpa mencampur sintaks Jinja di JS
         const flaskData = JSON.parse(document.getElementById('flask-data').textContent);
         const INTERCEPT = flaskData.intercept;
         const SLOPE = flaskData.slope;
         const scatterData = flaskData.scatterData;
         const lineData = flaskData.lineData;
 
-        // Elemen UI
         const rangeInput = document.getElementById('hoursRange');
         const numberInput = document.getElementById('hoursInput');
         const hoursBadge = document.getElementById('hoursBadge');
@@ -315,7 +302,6 @@
         const liveAdviceText = document.getElementById('liveAdviceText');
         const coordPill = document.getElementById('coordPill');
 
-        // Inisialisasi Chart.js
         const ctx = document.getElementById('regressionChart').getContext('2d');
         const regressionChart = new Chart(ctx, {
             data: {
@@ -382,7 +368,6 @@
             }
         });
 
-        // Fungsi Hitung Prediksi Live
         function calculateLive(hoursVal) {
             let h = parseFloat(hoursVal);
             if (isNaN(h) || h < 0) h = 0;
@@ -424,7 +409,6 @@
             regressionChart.update();
         }
 
-        // Event Listeners Slider & Input
         rangeInput.addEventListener('input', function() {
             numberInput.value = this.value;
             calculateLive(this.value);
@@ -435,7 +419,6 @@
             calculateLive(this.value);
         });
 
-        // Event Listener Tombol Preset Cepat
         document.querySelectorAll('.preset-pill').forEach(btn => {
             btn.addEventListener('click', function() {
                 const val = this.getAttribute('data-hours');
@@ -445,7 +428,6 @@
             });
         });
 
-        // Kalkulator Target Nilai (Tab 2)
         const targetScoreInput = document.getElementById('targetScoreInput');
         const neededHoursDisplay = document.getElementById('neededHoursDisplay');
 
@@ -457,7 +439,6 @@
             neededHoursDisplay.textContent = needed.toFixed(1) + ' Jam';
         });
 
-        // Dark / Light Mode Toggle
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
         const htmlEl = document.documentElement;
@@ -477,7 +458,6 @@
             regressionChart.update();
         });
 
-        // Jalankan kalkulasi awal saat halaman dimuat
         calculateLive(numberInput.value);
     </script>
 </body>
